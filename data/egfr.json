@@ -1,0 +1,116 @@
+{
+  "analysis_status": {
+    "input_type": "pdf",
+    "analysis_state": "completed",
+    "timestamp": "2026-06-11T23:11:00Z"
+  },
+  "executive_summary": {
+    "mutation": "EGFR Exon 19 Deletion",
+    "clinical_significance": "Pathogenic",
+    "affected_pathway": "ErbB / PI3K-AKT",
+    "recommended_therapy": "Osimertinib",
+    "confidence": 0.96
+  },
+  "metadata": {
+    "patient_id": "PT-11942",
+    "primary_tumor_type": "Lung Adenocarcinoma",
+    "mutation": {
+      "gene": "EGFR",
+      "variant": "Exon 19 Del",
+      "family": "ErbB"
+    }
+  },
+  "system_metrics": {
+    "gpu_hardware": "AMD Instinct MI300X",
+    "compute_platform": "ROCm v6.x Stack",
+    "tokens_generated": 1380,
+    "total_latency_ms": 395,
+    "vram_allocated_gb": 8.1
+  },
+  "agent_trace": [
+    {
+      "agent_name": "Molecular Detective",
+      "status": "completed",
+      "duration_ms": 110,
+      "task": "Isolation of exon 19 frame-shift deletion and simulation of tyrosine kinase domain conformational changes."
+    },
+    {
+      "agent_name": "Pathway Pathologist",
+      "status": "completed",
+      "duration_ms": 160,
+      "task": "Modeling downstream transduction pathways, focusing on parallel ErbB-activated PI3K-AKT and MAPK cascades."
+    },
+    {
+      "agent_name": "Therapeutic Matchmaker",
+      "status": "completed",
+      "duration_ms": 125,
+      "task": "Matching covalent TKIs, calculating brain-barrier ratios, and scanning ClinVar/FDA registries."
+    }
+  ],
+  "graph_data": {
+    "nodes": [
+      { "id": "N1", "label": "EGFR Exon 19 Del", "type": "mutation", "status": "active" },
+      { "id": "N2", "label": "EGFR Kinase Dimer", "type": "protein", "status": "constitutively_active" },
+      { "id": "N3", "label": "PI3K-AKT Signaling", "type": "pathway_node", "status": "hyperactive" },
+      { "id": "N4", "label": "MAPK Pathway", "type": "pathway_node", "status": "hyperactive" },
+      { "id": "N5", "label": "Tumor Survival & Growth", "type": "biological_outcome", "status": "abnormal" },
+      { "id": "N6", "label": "Osimertinib", "type": "therapeutic", "mechanism": "3rd-Gen EGFR TKI" }
+    ],
+    "edges": [
+      { "source": "N1", "target": "N2", "relation": "encodes_variant", "type": "genetic", "confidence": 0.98 },
+      { "source": "N2", "target": "N3", "relation": "activates", "type": "signaling", "confidence": 0.97 },
+      { "source": "N2", "target": "N4", "relation": "activates", "type": "signaling", "confidence": 0.95 },
+      { "source": "N3", "target": "N5", "relation": "drives", "type": "phenotype", "confidence": 0.94 },
+      { "source": "N4", "target": "N5", "relation": "drives", "type": "phenotype", "confidence": 0.93 },
+      { "source": "N6", "target": "N2", "relation": "irreversibly inhibits", "type": "intervention", "clinical_status": "recommended", "confidence": 0.97 }
+    ]
+  },
+  "pathway_intervention_engine": {
+    "baseline_pathway_activity_score": 0.88,
+    "predicted_post_intervention_activity_score": 0.18,
+    "therapeutic_rationale": "EGFR Exon 19 deletions result in hyperactivation of EGFR kinase activity, triggering downstream cellular growth and survival programs. Osimertinib (a third-generation, irreversible covalent TKI) potently targets activating EGFR mutations and potential secondary T790M resistance clones while leaving wild-type EGFR mostly untouched to minimize toxicities."
+  },
+  "why_not_exclusion_panel": [
+    {
+      "drug_name": "Gefitinib / Erlotinib",
+      "class": "1st-Gen EGFR TKI",
+      "status": "Not Recommended (Suboptimal)",
+      "reasoning": "First-generation TKIs are susceptible to rapid target mutation bypass (specifically the T790M gatekeeper mutation) and exhibit poor penetration of the blood-brain barrier compared to Osimertinib."
+    },
+    {
+      "drug_name": "Sotorasib",
+      "class": "KRAS G12C Inhibitor",
+      "status": "Contraindicated",
+      "reasoning": "Inapplicable. The driver mutation is an upstream EGFR activation defect; KRAS G12C is absent, making direct downstream pocket inhibition ineffective."
+    }
+  ],
+  "evidence_timeline": [
+    {
+      "step": 1,
+      "source_name": "ClinVar",
+      "assertion": "Variant Interpretation: Pathogenic",
+      "evidence_id": "VCV000016609",
+      "confidence_score": 0.99,
+      "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/VCV000016609/",
+      "snippet": "This deletion in EGFR exon 19 is a classic sensitizing alteration associated with tumor responsiveness to targeted TKIs."
+    },
+    {
+      "step": 2,
+      "source_name": "KEGG Pathway Database",
+      "assertion": "Mechanism: ErbB Signaling Cascade Activation",
+      "evidence_id": "hsa04012",
+      "confidence_score": 0.96,
+      "url": "https://www.genome.jp/dbget-bin/www_bget?pathway+hsa04012",
+      "snippet": "ErbB receptor dimer hyperactivation recruits adapter proteins to spark both PI3K/Akt and MEK/ERK downstream phosphorylation signals."
+    },
+    {
+      "step": 3,
+      "source_name": "FDA Oncology Knowledge Base",
+      "assertion": "Approval: First-Line Indication",
+      "evidence_id": "OncoKB-EGFR",
+      "confidence_score": 1.00,
+      "url": "https://www.oncokb.org/gene/EGFR#tab=Actionable",
+      "snippet": "Osimertinib is approved by the FDA as a first-line treatment for patients with metastatic NSCLC whose tumors have EGFR exon 19 deletions."
+    }
+  ]
+}

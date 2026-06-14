@@ -1,0 +1,116 @@
+{
+  "analysis_status": {
+    "input_type": "pdf",
+    "analysis_state": "completed",
+    "timestamp": "2026-06-11T23:13:00Z"
+  },
+  "executive_summary": {
+    "mutation": "EML4-ALK Fusion",
+    "clinical_significance": "Pathogenic",
+    "affected_pathway": "JAK-STAT / PI3K",
+    "recommended_therapy": "Alectinib",
+    "confidence": 0.97
+  },
+  "metadata": {
+    "patient_id": "PT-22391",
+    "primary_tumor_type": "Lung Adenocarcinoma",
+    "mutation": {
+      "gene": "ALK",
+      "variant": "EML4-ALK Fusion",
+      "family": "JAK-STAT"
+    }
+  },
+  "system_metrics": {
+    "gpu_hardware": "AMD Instinct MI300X",
+    "compute_platform": "ROCm v6.x Stack",
+    "tokens_generated": 1450,
+    "total_latency_ms": 412,
+    "vram_allocated_gb": 8.3
+  },
+  "agent_trace": [
+    {
+      "agent_name": "Molecular Detective",
+      "status": "completed",
+      "duration_ms": 122,
+      "task": "Isolation of chromosome 2p inversion breakpoint and structural alignment of EML4-ALK dimer coiled-coils."
+    },
+    {
+      "agent_name": "Pathway Pathologist",
+      "status": "completed",
+      "duration_ms": 165,
+      "task": "Simulating parallel downstream signaling hubs, focusing on STAT3 phosphorylation and PI3K/Akt survival loops."
+    },
+    {
+      "agent_name": "Therapeutic Matchmaker",
+      "status": "completed",
+      "duration_ms": 125,
+      "task": "Calculating blood-brain barrier permeability indexes, mapping gatekeeper mutations, and cross-referencing FDA registries."
+    }
+  ],
+  "graph_data": {
+    "nodes": [
+      { "id": "N1", "label": "EML4-ALK Fusion", "type": "mutation", "status": "active" },
+      { "id": "N2", "label": "EML4-ALK Chimeric Dimer", "type": "protein", "status": "constitutively_active" },
+      { "id": "N3", "label": "STAT3 Phosphorylation", "type": "pathway_node", "status": "hyperactive" },
+      { "id": "N4", "label": "AKT Activation", "type": "pathway_node", "status": "hyperactive" },
+      { "id": "N5", "label": "Mitotic Division & Survival", "type": "biological_outcome", "status": "abnormal" },
+      { "id": "N6", "label": "Alectinib", "type": "therapeutic", "mechanism": "Select ALK Inhibitor" }
+    ],
+    "edges": [
+      { "source": "N1", "target": "N2", "relation": "encodes_variant", "type": "genetic", "confidence": 0.99 },
+      { "source": "N2", "target": "N3", "relation": "activates", "type": "signaling", "confidence": 0.98 },
+      { "source": "N2", "target": "N4", "relation": "activates", "type": "signaling", "confidence": 0.96 },
+      { "source": "N3", "target": "N5", "relation": "drives", "type": "phenotype", "confidence": 0.95 },
+      { "source": "N4", "target": "N5", "relation": "drives", "type": "phenotype", "confidence": 0.94 },
+      { "source": "N6", "target": "N2", "relation": "selectively inhibits", "type": "intervention", "clinical_status": "recommended", "confidence": 0.97 }
+    ]
+  },
+  "pathway_intervention_engine": {
+    "baseline_pathway_activity_score": 0.95,
+    "predicted_post_intervention_activity_score": 0.15,
+    "therapeutic_rationale": "The EML4 coiled-coil domain drives constitutive dimerization and ligand-independent activation of ALK. Alectinib is a highly selective second-generation ALK inhibitor that prevents autophosphorylation, blocking downstream STAT3 and AKT survival signalling and crossing the BBB to control central nervous system metastasis."
+  },
+  "why_not_exclusion_panel": [
+    {
+      "drug_name": "Crizotinib",
+      "class": "1st-Gen ALK Inhibitor",
+      "status": "Not Recommended (Suboptimal)",
+      "reasoning": "Associated with high rates of cerebrospinal fluid failure because Crizotinib is a substrate for the P-gp drug efflux pump and fails to accumulate in the CNS."
+    },
+    {
+      "drug_name": "Osimertinib",
+      "class": "EGFR TKI",
+      "status": "Contraindicated",
+      "reasoning": "Inapplicable. The tumor is driven by the rearranged ALK fusion; EGFR WT signaling does not participate in oncogene addiction."
+    }
+  ],
+  "evidence_timeline": [
+    {
+      "step": 1,
+      "source_name": "ClinVar",
+      "assertion": "Variant Interpretation: Pathogenic",
+      "evidence_id": "VCV000622606",
+      "confidence_score": 0.99,
+      "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/VCV000622606/",
+      "snippet": "EML4-ALK chromosomal fusions are pathogenic somatic rearrangements driving lung cancer progression."
+    },
+    {
+      "step": 2,
+      "source_name": "KEGG Pathway Database",
+      "assertion": "Mechanism: JAK-STAT Signaling Pathway",
+      "evidence_id": "hsa04630",
+      "confidence_score": 0.94,
+      "url": "https://www.genome.jp/dbget-bin/www_bget?pathway+hsa04630",
+      "snippet": "JAK-STAT signal transduction pathways carry extracellular instructions to nuclear transcription factors."
+    },
+    {
+      "step": 3,
+      "source_name": "FDA Oncology Knowledge Base",
+      "assertion": "Approval: Targeted Actionable Indication",
+      "evidence_id": "OncoKB-ALK",
+      "confidence_score": 1.00,
+      "url": "https://www.oncokb.org/gene/ALK#tab=Actionable",
+      "snippet": "Alectinib is FDA-approved as a first-line treatment for ALK-positive metastatic non-small cell lung cancer (NSCLC)."
+    }
+  ]
+}

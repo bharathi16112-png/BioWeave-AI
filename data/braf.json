@@ -1,0 +1,111 @@
+{
+  "analysis_status": {
+    "input_type": "pdf",
+    "analysis_state": "completed",
+    "timestamp": "2026-06-11T23:10:00Z"
+  },
+  "executive_summary": {
+    "mutation": "BRAF V600E",
+    "clinical_significance": "Pathogenic",
+    "affected_pathway": "MAPK",
+    "recommended_therapy": "Dabrafenib + Trametinib",
+    "confidence": 0.98
+  },
+  "metadata": {
+    "patient_id": "PT-88392",
+    "primary_tumor_type": "Melanoma",
+    "mutation": {
+      "gene": "BRAF",
+      "variant": "V600E",
+      "family": "MAPK"
+    }
+  },
+  "system_metrics": {
+    "gpu_hardware": "AMD Instinct MI300X",
+    "compute_platform": "ROCm v6.x Stack",
+    "tokens_generated": 1421,
+    "total_latency_ms": 420,
+    "vram_allocated_gb": 8.4
+  },
+  "agent_trace": [
+    {
+      "agent_name": "Molecular Detective",
+      "status": "completed",
+      "duration_ms": 120,
+      "task": "Entity extraction, variant isolation, and protein structural impact mapping"
+    },
+    {
+      "agent_name": "Pathway Pathologist",
+      "status": "completed",
+      "duration_ms": 170,
+      "task": "Downstream cascade modeling, hyperactivation profiling, and phenotypic correlation"
+    },
+    {
+      "agent_name": "Therapeutic Matchmaker",
+      "status": "completed",
+      "duration_ms": 130,
+      "task": "Targeted drug matching, exclusion logic processing, and database provenance gathering"
+    }
+  ],
+  "graph_data": {
+    "nodes": [
+      { "id": "N1", "label": "BRAF V600E", "type": "mutation", "status": "active" },
+      { "id": "N2", "label": "B-Raf Kinase Monomer", "type": "protein", "status": "constitutively_active" },
+      { "id": "N3", "label": "MEK 1/2 Phosphorylation", "type": "pathway_node", "status": "hyperactive" },
+      { "id": "N4", "label": "ERK 1/2 Translocation", "type": "pathway_node", "status": "hyperactive" },
+      { "id": "N5", "label": "Cell Proliferation & Survival", "type": "biological_outcome", "status": "abnormal" },
+      { "id": "N6", "label": "Dabrafenib", "type": "therapeutic", "mechanism": "BRAF Inhibitor" },
+      { "id": "N7", "label": "Trametinib", "type": "therapeutic", "mechanism": "MEK Inhibitor" }
+    ],
+    "edges": [
+      { "source": "N1", "target": "N2", "relation": "encodes_variant", "type": "genetic", "confidence": 0.99 },
+      { "source": "N2", "target": "N3", "relation": "activates", "type": "signaling", "confidence": 0.97 },
+      { "source": "N3", "target": "N4", "relation": "phosphorylates", "type": "signaling", "confidence": 0.96 },
+      { "source": "N4", "target": "N5", "relation": "drives", "type": "phenotype", "confidence": 0.94 },
+      { "source": "N6", "target": "N2", "relation": "inhibits", "type": "intervention", "clinical_status": "recommended", "confidence": 0.98 },
+      { "source": "N7", "target": "N3", "relation": "inhibits", "type": "intervention", "clinical_status": "recommended", "confidence": 0.95 }
+    ]
+  },
+  "pathway_intervention_engine": {
+    "baseline_pathway_activity_score": 0.94,
+    "predicted_post_intervention_activity_score": 0.28,
+    "therapeutic_rationale": "The BRAF V600E mutation bypasses upstream RAS regulation, leading to continuous, monomeric activation of B-Raf. Combining a selective BRAF inhibitor (Dabrafenib) with a downstream MEK inhibitor (Trametinib) dual-blocks the cascade, significantly reducing vertical pathway escape and delaying acquired resistance channels."
+  },
+  "why_not_exclusion_panel": [
+    {
+      "drug_name": "Cetuximab / Panitumumab",
+      "class": "EGFR Monoclonal Antibody",
+      "status": "Contraindicated / Not Recommended",
+      "reasoning": "The BRAF V600E mutation acts downstream of the Epidermal Growth Factor Receptor (EGFR). Inhibiting EGFR upstream provides no therapeutic benefit because the mutant B-Raf protein propagates downstream mitotic signals completely independent of receptor-level activation."
+    }
+  ],
+  "evidence_timeline": [
+    {
+      "step": 1,
+      "source_name": "ClinVar",
+      "assertion": "Variant Interpretation: Pathogenic",
+      "evidence_id": "VCV000013961",
+      "confidence_score": 0.99,
+      "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/VCV000013961/",
+      "snippet": "The BRAF p.Val600Glu (V600E) substitution is a well-characterized oncogenic driver mutation altering the kinase activation segment."
+    },
+    {
+      "step": 2,
+      "source_name": "KEGG Pathway Database",
+      "assertion": "Mechanism: MAPK Signaling Cascade Overactivation",
+      "evidence_id": "hsa04010",
+      "confidence_score": 0.95,
+      "url": "https://www.genome.jp/dbget-bin/www_bget?pathway+hsa04010",
+      "snippet": "Mutant BRAF leads to constitutive phosphorylation of downstream targets MEK1/2 and ERK1/2, overriding standard cellular growth checkpoint regulations."
+    },
+    {
+      "step": 3,
+      "source_name": "FDA Oncology Knowledge Base",
+      "assertion": "Approval: Combination Therapy Indication",
+      "evidence_id": "OncoKB-BRAF",
+      "confidence_score": 1.00,
+      "url": "https://www.oncokb.org/gene/BRAF#tab=Actionable",
+      "snippet": "Dabrafenib in combination with trametinib is FDA-approved for the treatment of patients with unresectable or metastatic melanoma with BRAF V600E mutations."
+    }
+  ]
+}

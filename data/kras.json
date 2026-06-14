@@ -1,0 +1,115 @@
+{
+  "analysis_status": {
+    "input_type": "pdf",
+    "analysis_state": "completed",
+    "timestamp": "2026-06-11T23:12:00Z"
+  },
+  "executive_summary": {
+    "mutation": "KRAS G12C",
+    "clinical_significance": "Pathogenic",
+    "affected_pathway": "MAPK",
+    "recommended_therapy": "Sotorasib",
+    "confidence": 0.95
+  },
+  "metadata": {
+    "patient_id": "PT-50284",
+    "primary_tumor_type": "Lung Adenocarcinoma",
+    "mutation": {
+      "gene": "KRAS",
+      "variant": "G12C",
+      "family": "MAPK"
+    }
+  },
+  "system_metrics": {
+    "gpu_hardware": "AMD Instinct MI300X",
+    "compute_platform": "ROCm v6.x Stack",
+    "tokens_generated": 1512,
+    "total_latency_ms": 435,
+    "vram_allocated_gb": 8.6
+  },
+  "agent_trace": [
+    {
+      "agent_name": "Molecular Detective",
+      "status": "completed",
+      "duration_ms": 115,
+      "task": "Isolation of KRAS codon 12 missense substitution and modeling of switch-II pocket conformation states."
+    },
+    {
+      "agent_name": "Pathway Pathologist",
+      "status": "completed",
+      "duration_ms": 175,
+      "task": "Downstream modeling of G-protein hyperactivation and signaling propagation into RAF-MEK-ERK cascades."
+    },
+    {
+      "agent_name": "Therapeutic Matchmaker",
+      "status": "completed",
+      "duration_ms": 145,
+      "task": "Calculating covalent binding kinetics, reviewing clinical trial results, and cross-referencing FDA registries."
+    }
+  ],
+  "graph_data": {
+    "nodes": [
+      { "id": "N1", "label": "KRAS G12C", "type": "mutation", "status": "active" },
+      { "id": "N2", "label": "K-Ras Active GTP-State", "type": "protein", "status": "constitutively_active" },
+      { "id": "N3", "label": "RAF Kinase Recruitment", "type": "pathway_node", "status": "hyperactive" },
+      { "id": "N4", "label": "MEK/ERK Cascade", "type": "pathway_node", "status": "hyperactive" },
+      { "id": "N5", "label": "Uncontrolled Cell Division", "type": "biological_outcome", "status": "abnormal" },
+      { "id": "N6", "label": "Sotorasib", "type": "therapeutic", "mechanism": "KRAS G12C Inhibitor" }
+    ],
+    "edges": [
+      { "source": "N1", "target": "N2", "relation": "encodes_variant", "type": "genetic", "confidence": 0.99 },
+      { "source": "N2", "target": "N3", "relation": "activates", "type": "signaling", "confidence": 0.98 },
+      { "source": "N3", "target": "N4", "relation": "phosphorylates", "type": "signaling", "confidence": 0.96 },
+      { "source": "N4", "target": "N5", "relation": "drives", "type": "phenotype", "confidence": 0.94 },
+      { "source": "N6", "target": "N2", "relation": "covalently inhibits", "type": "intervention", "clinical_status": "recommended", "confidence": 0.96 }
+    ]
+  },
+  "pathway_intervention_engine": {
+    "baseline_pathway_activity_score": 0.92,
+    "predicted_post_intervention_activity_score": 0.22,
+    "therapeutic_rationale": "KRAS G12C mutations lock the Ras protein in its active GTP-bound state, continuously stimulating RAF. Sotorasib covalently and irreversibly binds to the switch-II pocket of inactive GDP-bound KRAS G12C, trapping the protein in its inactive state and cutting off downstream MAPK cell growth signals."
+  },
+  "why_not_exclusion_panel": [
+    {
+      "drug_name": "Osimertinib",
+      "class": "EGFR TKI",
+      "status": "Contraindicated",
+      "reasoning": "Mutated KRAS operates autonomously downstream of the EGFR receptor. Blockade at the EGFR level fails because the active mutant Ras continues to propagate mitotic signals independently."
+    },
+    {
+      "drug_name": "Dabrafenib + Trametinib",
+      "class": "BRAF/MEK Inhibitors",
+      "status": "Not Recommended",
+      "reasoning": "Inapplicable due to lack of a BRAF mutation driver; utilizing downstream inhibitors alone has limited efficacy and is associated with high off-target systemic toxicities."
+    }
+  ],
+  "evidence_timeline": [
+    {
+      "step": 1,
+      "source_name": "ClinVar",
+      "assertion": "Variant Interpretation: Pathogenic",
+      "evidence_id": "VCV000375836",
+      "confidence_score": 0.99,
+      "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/VCV000375836/",
+      "snippet": "The KRAS p.Gly12Cys mutation represents a highly validated somatic oncogenic alteration across lung adenocarcinoma cohorts."
+    },
+    {
+      "step": 2,
+      "source_name": "KEGG Pathway Database",
+      "assertion": "Mechanism: Ras Signaling Signaling Cascade",
+      "evidence_id": "hsa04010",
+      "confidence_score": 0.95,
+      "url": "https://www.genome.jp/dbget-bin/www_bget?pathway+hsa04010",
+      "snippet": "MAPK pathway components are wired downstream of Ras activation, directing core transcription factor phosphorylation."
+    },
+    {
+      "step": 3,
+      "source_name": "FDA Oncology Knowledge Base",
+      "assertion": "Approval: Targeted Actionable Indication",
+      "evidence_id": "OncoKB-KRAS",
+      "confidence_score": 1.00,
+      "url": "https://www.oncokb.org/gene/KRAS#tab=Actionable",
+      "snippet": "Sotorasib is FDA-approved for KRAS G12C mutated locally advanced or metastatic non-small cell lung cancer (NSCLC)."
+    }
+  ]
+}
