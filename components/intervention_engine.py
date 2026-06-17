@@ -3,8 +3,7 @@ import time
 
 def render_intervention_engine(profile_data):
     """Renders the pathway suppression animation engine mapping overall cascade scores."""
-    st.markdown(
-        """
+    st.html("""
         <div style="margin-bottom: 20px;">
             <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-weight: 600; color: #FFFFFF; font-size: 1.4rem;">
                 Pathway Intervention Engine
@@ -13,14 +12,15 @@ def render_intervention_engine(profile_data):
                 In-silico docking and inhibition animation. Simulates cascade phosphorylation suppression.
             </p>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+    """)
     
     engine_data = profile_data.get("pathway_intervention_engine", {})
     baseline = engine_data.get("baseline_pathway_activity_score", 1.0)
     post_interv = engine_data.get("predicted_post_intervention_activity_score", 0.0)
     rationale = engine_data.get("therapeutic_rationale", "N/A")
+
+    # Suppression delta
+    suppression_pct = int(round((baseline - post_interv) / baseline * 100)) if baseline > 0 else 0
     
     summary = profile_data.get("executive_summary", {})
     drug_name = summary.get("recommended_therapy", "Targeted Agent")
@@ -46,8 +46,7 @@ def render_intervention_engine(profile_data):
             bar_color   = "linear-gradient(90deg, #00F0FF 0%, #008283 100%)"
             status_text = "SUPPRESSED PATHWAY"
             badge_color = "#A8FFB2"
-        slot.markdown(
-            f"""
+        slot.html(f"""
             <div style="background: rgba(22,27,34,0.6); backdrop-filter: blur(12px);
                         border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
                         padding: 24px; height: 100%;">
@@ -83,16 +82,13 @@ def render_intervention_engine(profile_data):
                     <span>Target Post-Drug: {int(post_interv * 100)}%</span>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        """)
 
     # ── Layout ───────────────────────────────────────────────────────
     col1, col2 = st.columns([1, 1])
 
     with col1:
-        st.markdown(
-            f"""
+        st.html(f"""
             <div style="background: rgba(22,27,34,0.6); backdrop-filter: blur(12px);
                         border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
                         padding: 24px; height: 100%;">
@@ -106,9 +102,7 @@ def render_intervention_engine(profile_data):
                     activity suppression.
                 </p>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        """)
 
         run_sim   = st.button("⚡ Run Covalent Docking Sim",  key=f"run_btn_{sim_key}",   use_container_width=True)
         reset_sim = st.button("🔄 Reset Baseline Cascade",    key=f"reset_btn_{sim_key}", use_container_width=True)
@@ -150,19 +144,52 @@ def render_intervention_engine(profile_data):
     
     # (score card is rendered above inside _render_score_card via score_slot)
         
-    st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
+    st.html("<div style='margin-bottom: 15px;'></div>")
     
-    # Rationale panel
-    st.markdown(
-        f"""
-        <div style="background: rgba(22,27,34,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); border-left: 4px solid #00D2D3; border-radius: 12px; padding: 24px; margin-bottom: 16px;">
-            <h5 style="margin: 0 0 8px 0; color: #00D2D3; font-family: 'Outfit', sans-serif; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">
-                Therapeutic Mechanism & Rationale
+    # Rationale panel with suppression delta badge — use st.html() to avoid markdown escaping
+    st.html(f"""
+    <div style="background: rgba(22,27,34,0.6); backdrop-filter: blur(12px);
+                border: 1px solid rgba(255,255,255,0.08);
+                border-left: 4px solid #00D2D3;
+                border-radius: 12px; padding: 24px; margin-bottom: 16px;">
+
+        <!-- Header row: title + delta badge -->
+        <div style="display: flex; align-items: center; justify-content: space-between;
+                    margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <h5 style="margin: 0; color: #00D2D3; font-family: 'Outfit', sans-serif;
+                       text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">
+                Therapeutic Mechanism &amp; Rationale
             </h5>
-            <p style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 0.95rem; line-height: 1.5; color: #E6EDF3;">
-                {rationale}
-            </p>
+            <span style="
+                background: linear-gradient(135deg, rgba(168,255,178,0.15) 0%, rgba(0,210,211,0.10) 100%);
+                border: 1px solid rgba(168,255,178,0.4);
+                padding: 4px 14px;
+                border-radius: 20px;
+                font-family: 'Space Mono', monospace;
+                font-size: 0.8rem;
+                font-weight: bold;
+                color: #A8FFB2;
+                white-space: nowrap;
+                letter-spacing: 0.3px;
+            ">&#x25BC; {suppression_pct}% Cascade Suppression</span>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <!-- Compact stats row -->
+        <div style="display: flex; gap: 20px; margin-bottom: 14px; flex-wrap: wrap;">
+            <div style="font-family: 'Space Mono', monospace; font-size: 0.75rem; color: #707070;">
+                Baseline&nbsp;<span style="color: #FF4B4B; font-weight: bold;">{int(baseline * 100)}%</span>
+            </div>
+            <div style="font-family: 'Space Mono', monospace; font-size: 0.75rem; color: #707070;">
+                Post-Drug&nbsp;<span style="color: #A8FFB2; font-weight: bold;">{int(post_interv * 100)}%</span>
+            </div>
+            <div style="font-family: 'Space Mono', monospace; font-size: 0.75rem; color: #707070;">
+                Net Delta&nbsp;<span style="color: #00D2D3; font-weight: bold;">&#x2212;{suppression_pct}%</span>
+            </div>
+        </div>
+
+        <p style="margin: 0; font-family: 'Outfit', sans-serif;
+                  font-size: 0.95rem; line-height: 1.55; color: #E6EDF3;">
+            {rationale}
+        </p>
+    </div>
+    """)

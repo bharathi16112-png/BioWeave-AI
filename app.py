@@ -61,6 +61,7 @@ if st.sidebar.button("⚡ Run Real-Time Multi-Agent Trace", type="primary", use_
             live_data = run_multi_agent_pipeline(user_report, uploaded_image=uploaded_file)
             if live_data:
                 st.session_state['live_profile'] = live_data
+                st.session_state['animate_trace'] = True   # trigger sequential reveal
                 st.success("Multimodal Inference completed successfully!")
     else:
         st.sidebar.warning("Please upload an image or paste a report first.")
@@ -79,11 +80,13 @@ selected_mutation = st.sidebar.selectbox(
 # Load selected mutation data
 if "live_profile" in st.session_state:
     profile_data = st.session_state["live_profile"]
+    _animate = st.session_state.pop("animate_trace", False)  # consume flag once
     st.sidebar.success("Displaying live inference results")
     if st.sidebar.button("Clear Live Profile", use_container_width=True):
         del st.session_state["live_profile"]
         st.rerun()
 else:
+    _animate = False
     try:
         profile_data = load_profile(selected_mutation)
     except Exception as e:
@@ -122,7 +125,7 @@ with col_a:
     render_intervention_engine(profile_data)
 
 with col_b:
-    render_agent_trace(profile_data)
+    render_agent_trace(profile_data, animate=_animate)
 
 st.html('<div style="margin-bottom: 28px;"></div>')
 
