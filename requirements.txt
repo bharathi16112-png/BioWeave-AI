@@ -4,3 +4,5 @@ plotly>=5.15.0
 torch
 transformers
 pillow
+timm
+scikit-learn
