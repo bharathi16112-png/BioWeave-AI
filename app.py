@@ -42,19 +42,28 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-st.sidebar.subheader("Live Inference (AMD MI300X)")
-raw_report = st.sidebar.text_area(
-    "Paste Raw Clinical Report", 
-    height=150, 
-    placeholder="Patient exhibits BRAF V600E mutation with elevated MEK signaling..."
+st.sidebar.title("🧬 Live Multimodal Intake")
+
+uploaded_file = st.sidebar.file_uploader(
+    "Upload Clinical Scan / Pathology Slide:", 
+    type=["png", "jpg", "jpeg"]
 )
-if st.sidebar.button("⚡ Run Multi-Agent Pipeline", type="primary", use_container_width=True):
-    if raw_report.strip():
-        inferred_profile = run_multi_agent_pipeline(raw_report)
-        if inferred_profile:
-            st.session_state["live_profile"] = inferred_profile
+
+if uploaded_file:
+    st.sidebar.image(uploaded_file, caption="Uploaded Patient Slide Scan", use_container_width=True)
+    st.sidebar.info("📷 Image detected. Initializing Multimodal Visual Agent...")
+
+user_report = st.sidebar.text_area("Paste Raw Genomic Text Report (Optional):")
+
+if st.sidebar.button("⚡ Run Real-Time Multi-Agent Trace", type="primary", use_container_width=True):
+    if uploaded_file or user_report.strip():
+        with st.spinner("Orchestrating Vision & Text Agents on AMD Instinct MI300X..."):
+            live_data = run_multi_agent_pipeline(user_report, uploaded_image=uploaded_file)
+            if live_data:
+                st.session_state['live_profile'] = live_data
+                st.success("Multimodal Inference completed successfully!")
     else:
-        st.sidebar.warning("Please paste a report first.")
+        st.sidebar.warning("Please upload an image or paste a report first.")
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("Or Select Mock Profile")

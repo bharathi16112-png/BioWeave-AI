@@ -25,11 +25,12 @@ import logging
 import torch
 import streamlit as st
 from transformers import pipeline as hf_pipeline
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
 # ── Model identifier ──────────────────────────────────────────────────────────
-MODEL_ID = "meta-llama/Meta-Llama-3-8B-Instruct"
+MODEL_ID = "meta-llama/Llama-3.2-11B-Vision-Instruct"
 
 # ── Maximum tokens the model should generate ─────────────────────────────────
 MAX_NEW_TOKENS = 1200
@@ -70,30 +71,24 @@ def _resolve_device() -> str:
 @st.cache_resource(show_spinner=False)
 def load_inference_model():
     """
-    Loads Llama-3-8B-Instruct into MI300X VRAM using native
+    Loads Llama-3.2-11B-Vision-Instruct into MI300X VRAM using native
     PyTorch / HIP compilation via the ROCm CUDA compat layer.
-
-    `device_map="auto"` + `torch_dtype=torch.float16` keeps the full
-    8 B parameter model comfortably within a single MI300X's 192 GB
-    HBM3 pool while maximising throughput.
 
     Returns
     -------
     transformers.Pipeline
-        A text-generation pipeline bound to the resolved device.
+        A multimodal pipeline bound to the resolved device.
     """
     device = _resolve_device()
-
-    # On MI300X: float16 is optimal — bfloat16 also works on ROCm 6+
     dtype = torch.float16
 
     pipe = hf_pipeline(
-        "text-generation",
+        "image-text-to-text",
         model=MODEL_ID,
         torch_dtype=dtype,
-        device_map="auto",          # routes all layers to GPU VRAM
+        device_map="auto",
         model_kwargs={
-            "low_cpu_mem_usage": True,   # stream weights from disk → GPU
+            "low_cpu_mem_usage": True,
         },
     )
 
@@ -239,23 +234,11 @@ RULES:
 # Public API
 # ─────────────────────────────────────────────────────────────────────────────
 
-def run_multi_agent_pipeline(raw_patient_report: str) -> dict | None:
+def run_multi_agent_pipeline(raw_patient_report: str, uploaded_image=None) -> dict | None:
     """
     Runs the full multi-agent oncology reasoning pipeline against a raw
-    clinical text report.
-
-    Parameters
-    ----------
-    raw_patient_report : str
-        Free-text or structured clinical/genomic report to analyse.
-
-    Returns
-    -------
-    dict | None
-        Parsed profile_data dict (matches dashboard schema) on success,
-        or None on unrecoverable error.
+    clinical text report and optional pathology slide image.
     """
-    # ── 1. Load model ─────────────────────────────────────────────────
     try:
         pipe = load_inference_model()
     except Exception as exc:
@@ -263,36 +246,49 @@ def run_multi_agent_pipeline(raw_patient_report: str) -> dict | None:
         logger.exception("Model load failed")
         return None
 
-    # ── 2. Build Llama-3 chat messages ────────────────────────────────
+    # Handle real multimodal context
+    if uploaded_image is not None:
+        pil_image = Image.open(uploaded_image).convert("RGB")
+        content_payload = [
+            {"type": "image"},
+            {"type": "text", "text": f"Patient Report Text: {raw_patient_report if raw_patient_report else 'See attached image content.'}"}
+        ]
+    else:
+        pil_image = None
+        content_payload = [
+            {"type": "text", "text": f"Patient Report Text: {raw_patient_report}"}
+        ]
+
     messages = [
         {"role": "system", "content": _SYSTEM_PROMPT},
-        {
-            "role": "user",
-            "content": (
-                f"Analyze the following clinical genomic report and return "
-                f"the structured JSON output:\n\n{raw_patient_report}"
-            ),
-        },
+        {"role": "user", "content": content_payload}
     ]
 
-    # Apply Llama-3 instruct chat template
     prompt = pipe.tokenizer.apply_chat_template(
         messages,
         tokenize=False,
         add_generation_prompt=True,
     )
 
-    # ── 3. Inference on MI300X ────────────────────────────────────────
     t0 = time.perf_counter()
-    with st.spinner("⚡ Processing genomic tensors on AMD MI300X…"):
-        outputs = pipe(
-            prompt,
-            max_new_tokens=MAX_NEW_TOKENS,
-            do_sample=False,
-            temperature=None,       # required when do_sample=False
-            top_p=None,             # required when do_sample=False
-            repetition_penalty=1.05,
-        )
+    with st.spinner("⚡ Processing image pixels and genomic sequence vectors on AMD MI300X…"):
+        # Llama-3.2 Vision uses 'image-text-to-text', pass the image or a dummy string if missing
+        if pil_image:
+            outputs = pipe(
+                pil_image,
+                prompt=prompt,
+                max_new_tokens=MAX_NEW_TOKENS,
+                do_sample=False,
+            )
+        else:
+            # Fallback to pure text generation via the multimodal pipeline
+            outputs = pipe(
+                "",
+                prompt=prompt,
+                max_new_tokens=MAX_NEW_TOKENS,
+                do_sample=False,
+            )
+            
     latency_ms = int((time.perf_counter() - t0) * 1000)
 
     raw_output = outputs[0]["generated_text"][len(prompt):].strip()
