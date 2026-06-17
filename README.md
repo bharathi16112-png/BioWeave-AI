@@ -45,15 +45,14 @@ BioWeave-AI is a high-performance, multi-agent reasoning platform designed for r
 git clone https://github.com/bharathi16112-png/BioWeave-AI.git
 cd BioWeave-AI
 
-# Activate your virtual environment
-# (Example for a standard Windows/Linux venv)
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+# Activate your AMD cluster virtual environment
+source /workspace/shared/bio_env/bin/activate
 
 # Install application dependencies
 pip install -r requirements.txt
 
-# Launch the precision oncology dashboard
-streamlit run app.py
+# Launch the precision oncology dashboard via the cluster proxy configuration
+streamlit run app.py --server.port 8501 --server.headless true
 ```
 
 ## 🔬 How it Works
