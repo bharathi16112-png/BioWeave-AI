@@ -196,7 +196,15 @@ _ELEMENT_TO_AD4 = {
 
 
 def _minimal_pdb_to_pdbqt(pdb_path: str, output_path: Path) -> None:
-    """Write a minimal PDBQT from a PDB file (no charges — Gasteiger omitted)."""
+    """
+    Write a minimal PDBQT from a PDB file.
+
+    PDBQT fixed-column format (Vina 1.2.x strict):
+      cols  1- 6  record type (ATOM/HETATM)
+      cols  7-66  standard PDB fields
+      cols 67-72  partial charge: %6.3f  e.g. ' 0.000'
+      cols 73-76  AutoDock atom type, left-padded to 4 chars e.g. '  NA'
+    """
     lines_out = []
     with open(pdb_path) as f:
         for line in f:
@@ -205,17 +213,27 @@ def _minimal_pdb_to_pdbqt(pdb_path: str, output_path: Path) -> None:
                 if record in ("TER", "END"):
                     lines_out.append(line.rstrip())
                 continue
-            # Extract element from columns 76-78 or infer from atom name
+
+            # Infer element from PDB cols 77-78, else from atom name col 13-16
             element = line[76:78].strip().upper() if len(line) > 76 else ""
             if not element:
                 atom_name = line[12:16].strip()
                 element = "".join(c for c in atom_name if c.isalpha())[:2].upper()
             ad4_type = _ELEMENT_TO_AD4.get(element, "C")
-            # PDBQT format: exactly 66 chars of PDB + "  0.00" (charge) + " " + 2-char type
-            # Total line: cols 1-66 PDB | cols 67-72 charge "  0.00" | col 73 " " | cols 74-75 type
-            base = line[:66].rstrip().ljust(66)
-            pdbqt_line = f"{base}  0.000 {ad4_type:<2}"
+
+            # Pad/truncate base to exactly 66 chars
+            base = line[:66]
+            if len(base) < 66:
+                base = base.ljust(66)
+
+            # charge: 6 chars right-justified  " 0.000"
+            # type:   4 chars right-justified  "  NA" or "   C"
+            charge_str = f"{0.0:6.3f}"          # ' 0.000'  (6 chars)
+            type_str   = f"{ad4_type:>4}"        # '  NA'    (4 chars)
+
+            pdbqt_line = base + charge_str + type_str
             lines_out.append(pdbqt_line)
+
     output_path.write_text("\n".join(lines_out))
 
 
