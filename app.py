@@ -51,23 +51,37 @@ uploaded_file = st.sidebar.file_uploader(
 
 if uploaded_file:
     st.sidebar.image(uploaded_file, caption="Uploaded Patient Slide Scan", use_container_width=True)
-    st.sidebar.info("📷 Image detected. Initializing Multimodal Visual Agent...")
+    st.sidebar.info("📷 Image attached for visual screening. Genomic text is required for live mutation detection.")
 
-user_report = st.sidebar.text_area("Paste Raw Genomic Text Report (Optional):")
+user_report = st.sidebar.text_area(
+    "Paste Raw Genomic Text Report:",
+    help="Required for live inference. Image alone cannot determine oncology mutations without a pathology-fine-tuned model.",
+)
 
 if st.sidebar.button("⚡ Run Real-Time Multi-Agent Trace", type="primary", use_container_width=True):
     if uploaded_file or user_report.strip():
-        with st.spinner("Orchestrating Vision & Text Agents on AMD Instinct MI300X..."):
+        with st.spinner("Running Molecular Detective → Pathway Pathologist → Therapeutic Matchmaker..."):
             live_data = run_multi_agent_pipeline(user_report, uploaded_image=uploaded_file)
             if live_data:
-                st.session_state['live_profile'] = live_data
-                st.session_state['animate_trace'] = True   # trigger sequential reveal
-                st.success("Multimodal Inference completed successfully!")
+                state = live_data.get("analysis_status", {}).get("analysis_state")
+                if state == "insufficient_evidence":
+                    st.session_state["live_profile"] = live_data
+                    st.session_state["animate_trace"] = False
+                    st.sidebar.warning(live_data["analysis_status"].get("message", "Insufficient evidence."))
+                else:
+                    st.session_state["live_profile"] = live_data
+                    st.session_state["animate_trace"] = True
+                    st.success("Live inference completed successfully.")
     else:
-        st.sidebar.warning("Please upload an image or paste a report first.")
+        st.sidebar.warning("Please upload an image or paste a genomic report first.")
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("Or Select Mock Profile")
+st.sidebar.caption(
+    "Free APIs: ClinVar (NCBI) · CIViC · OncoKB demo/public · "
+    "Models: owkin/phikon · OpenMed NER"
+)
+
+st.sidebar.subheader("Or Select Demo Case")
 available_mutations = get_available_mutations()
 
 selected_mutation = st.sidebar.selectbox(
@@ -93,15 +107,28 @@ else:
         st.error(f"Failed to load mutation profile: {e}")
         st.stop()
 
+# Clinical disclaimer
+st.warning(
+    "**Research & demonstration use only.** This platform is not FDA-cleared, not validated "
+    "for clinical decision-making, and must not be used to diagnose or treat patients. "
+    "Live inference uses regex NER + curated knowledge bases; optional OncoKB and LLM enrichment "
+    "require explicit configuration.",
+    icon="⚠️",
+)
+
+analysis_state = profile_data.get("analysis_status", {}).get("analysis_state", "completed")
+if analysis_state == "insufficient_evidence":
+    st.error(profile_data.get("analysis_status", {}).get("message", "Insufficient evidence to proceed."))
+
 # Header Section
 st.markdown(
-    f"""
+    """
     <div style="margin-bottom: 25px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 15px;">
         <h1 style="margin: 0; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 2.1rem; color: #FFFFFF; letter-spacing: -0.8px;">
             Precision Oncology Multi-Agent Reasoning Platform
         </h1>
         <p style="margin: 5px 0 0 0; font-size: 0.95rem; color: #8892B0; font-family: 'Outfit', sans-serif;">
-            Real-time genomic profiling, cell signaling network mapping, and therapeutic intervention simulation.
+            Live genomic NER, pathway mapping, OncoKB evidence enrichment, and intervention simulation.
         </p>
     </div>
     """,
@@ -111,32 +138,36 @@ st.markdown(
 # ── Row 1: Executive Summary + Hardware Telemetry ──────────────────────────
 render_executive_summary(profile_data)
 
-st.html('<div style="margin-bottom: 28px;"></div>')
+if analysis_state == "completed":
+    st.html('<div style="margin-bottom: 28px;"></div>')
 
-# ── Row 2: Biological Signaling Network (full width) ────────────────────────
-render_network_graph(profile_data)
+    # ── Row 2: Biological Signaling Network (full width) ────────────────────────
+    render_network_graph(profile_data)
 
-st.html('<div style="margin-bottom: 28px;"></div>')
+    st.html('<div style="margin-bottom: 28px;"></div>')
 
-# ── Row 3: Pathway Intervention Engine + Agent Trace (side by side) ─────────
-col_a, col_b = st.columns([1, 1], gap="large")
+    # ── Row 3: Pathway Intervention Engine + Agent Trace (side by side) ─────────
+    col_a, col_b = st.columns([1, 1], gap="large")
 
-with col_a:
-    render_intervention_engine(profile_data)
+    with col_a:
+        render_intervention_engine(profile_data)
 
-with col_b:
-    render_agent_trace(profile_data, animate=_animate)
+    with col_b:
+        render_agent_trace(profile_data, animate=_animate)
 
-st.html('<div style="margin-bottom: 28px;"></div>')
+    st.html('<div style="margin-bottom: 28px;"></div>')
 
-# ── Row 4: Clinical Exclusions + Evidence Registry (tabbed, full width) ──────
-tab1, tab2 = st.tabs(["🚫  Exclusions & Contraindications", "📚  Reference Evidence Registry"])
+    # ── Row 4: Clinical Exclusions + Evidence Registry (tabbed, full width) ──────
+    tab1, tab2 = st.tabs(["🚫  Exclusions & Contraindications", "📚  Reference Evidence Registry"])
 
-with tab1:
-    render_why_not_panel(profile_data)
+    with tab1:
+        render_why_not_panel(profile_data)
 
-with tab2:
-    render_evidence_timeline(profile_data)
+    with tab2:
+        render_evidence_timeline(profile_data)
+else:
+    st.html('<div style="margin-bottom: 28px;"></div>')
+    render_agent_trace(profile_data, animate=False)
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.html("""
@@ -150,7 +181,7 @@ st.html("""
     color: #505050;
     letter-spacing: 0.5px;
 ">
-    PRECISION ONCOLOGY DEEP REASONER v1.0.0 &bull; HARDWARE: AMD INSTINCT MI300X &bull; ROCm v6.1
+    PRECISION ONCOLOGY DEEP REASONER v1.1.0 &bull; RESEARCH USE ONLY &bull; LIVE INFERENCE ENABLED
 </div>
 """)
 

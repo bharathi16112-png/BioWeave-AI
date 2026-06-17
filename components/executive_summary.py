@@ -26,9 +26,21 @@ def render_executive_summary(profile_data):
     tokens  = metrics.get("tokens_generated", 0)
     vram    = metrics.get("vram_allocated_gb", 0.0)
 
-    signif_color = "#FF4B4B" if clinical_signif.lower() == "pathogenic" else "#FFAF66"
-    signif_bg    = "rgba(255,75,75,0.1)"
-    signif_bd    = "rgba(255,75,75,0.3)"
+    signif_lower = clinical_signif.lower()
+    if signif_lower == "pathogenic":
+        signif_color = "#FF4B4B"
+        signif_bg = "rgba(255,75,75,0.1)"
+        signif_bd = "rgba(255,75,75,0.3)"
+    elif signif_lower == "unknown":
+        signif_color = "#FFAF66"
+        signif_bg = "rgba(255,175,102,0.1)"
+        signif_bd = "rgba(255,175,102,0.3)"
+    else:
+        signif_color = "#FFAF66"
+        signif_bg = "rgba(255,175,102,0.1)"
+        signif_bd = "rgba(255,175,102,0.3)"
+
+    engine_label = "INFERENCE ENGINE ACTIVE" if latency > 0 else "STANDBY"
 
     html = f"""
     <div style="font-family: 'Outfit', sans-serif;">
@@ -56,7 +68,7 @@ def render_executive_summary(profile_data):
             font-family: 'Space Mono', monospace;
             font-size: 0.82rem;
             font-weight: bold;
-          ">ROCm ENGINE ACTIVE</span>
+          ">{engine_label}</span>
           <span style="font-weight: 600; color: #FFFFFF; font-size: 0.95rem;">
             {gpu} &bull; <span style="color: #ED145B;">{compute}</span>
           </span>

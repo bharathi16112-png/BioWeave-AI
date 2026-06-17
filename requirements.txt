@@ -1,8 +1,20 @@
 streamlit>=1.35.0
-pandas>=2.0.0
-plotly>=5.15.0
 torch
 transformers
 pillow
-timm
-scikit-learn
+requests>=2.31.0
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.9
+
+# AutoDock Vina molecular docking (Phase 3)
+# Install on your AMD cluster or local machine:
+#   pip install vina meeko rdkit
+# On conda (recommended — binary wheels available):
+#   conda install -c conda-forge vina meeko rdkit
+#
+# These are optional — the pipeline falls back to curated static scores
+# when not installed. Remove the # below to make them hard requirements:
+# vina>=1.2.3
+# meeko>=0.5.0
+# rdkit>=2024.3.1

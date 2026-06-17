@@ -1,6 +1,6 @@
 import json
 import os
-import streamlit as st
+from functools import lru_cache
 
 # Map profiles to their relative filenames
 MUTATION_FILES = {
@@ -10,7 +10,7 @@ MUTATION_FILES = {
     "EML4-ALK Fusion": "alk.json"
 }
 
-@st.cache_data
+@lru_cache(maxsize=8)
 def load_profile(mutation_name):
     """Loads and returns the JSON file associated with a mutation profile."""
     if mutation_name not in MUTATION_FILES:

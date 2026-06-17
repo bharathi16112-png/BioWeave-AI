@@ -1,0 +1,125 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BioWeave-AI docker-compose
+#
+# Services:
+#   dashboard   — Streamlit UI on :8501
+#   api         — FastAPI backend on :8000
+#
+# GPU profile (AMD ROCm):
+#   docker compose --profile rocm up
+#
+# CPU / dev mode (no GPU):
+#   docker compose up
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-common-env: &common-env
+  BIOWEAVE_CONTACT_EMAIL: ${BIOWEAVE_CONTACT_EMAIL:-bharathi16112@gmail.com}
+  NCBI_API_KEY: ${NCBI_API_KEY:-8822d326fc42e73d38d0d378c35d16c12b08}
+  ONCOKB_API_TOKEN: ${ONCOKB_API_TOKEN:-}
+  BIOWEAVE_API_KEYS: ${BIOWEAVE_API_KEYS:-}
+  BIOWEAVE_AUDIT_LOG_PATH: /app/logs/audit.jsonl
+  BIOWEAVE_ENABLE_DOCKING: ${BIOWEAVE_ENABLE_DOCKING:-true}
+  BIOWEAVE_DOCKING_CACHE: /app/.cache/docking
+  BIOWEAVE_LLM_MODEL: ${BIOWEAVE_LLM_MODEL:-}
+  BIOWEAVE_LLM_QUANT: ${BIOWEAVE_LLM_QUANT:-auto}
+
+services:
+
+  # ── Streamlit Dashboard ──────────────────────────────────────────────────────
+  dashboard:
+    build:
+      context: .
+      target: cpu          # Switch to 'rocm' on AMD cluster
+    image: bioweave-ai:cpu
+    container_name: bioweave-dashboard
+    command: streamlit run app.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      <<: *common-env
+    volumes:
+      - ./logs:/app/logs
+      - model-cache:/app/.cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── FastAPI REST Backend ─────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      target: cpu
+    image: bioweave-ai:cpu
+    container_name: bioweave-api
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --workers 2
+    ports:
+      - "8000:8000"
+    environment:
+      <<: *common-env
+    volumes:
+      - ./logs:/app/logs
+      - model-cache:/app/.cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── ROCm GPU variants (activate with: docker compose --profile rocm up) ──────
+  dashboard-rocm:
+    profiles: ["rocm"]
+    build:
+      context: .
+      target: rocm
+    image: bioweave-ai:rocm
+    container_name: bioweave-dashboard-rocm
+    command: streamlit run app.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      <<: *common-env
+      BIOWEAVE_DISABLE_ML: "false"
+    volumes:
+      - ./logs:/app/logs
+      - model-cache:/app/.cache
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    group_add:
+      - video
+      - render
+    restart: unless-stopped
+
+  api-rocm:
+    profiles: ["rocm"]
+    build:
+      context: .
+      target: rocm
+    image: bioweave-ai:rocm
+    container_name: bioweave-api-rocm
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --workers 1
+    ports:
+      - "8000:8000"
+    environment:
+      <<: *common-env
+      BIOWEAVE_DISABLE_ML: "false"
+    volumes:
+      - ./logs:/app/logs
+      - model-cache:/app/.cache
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    group_add:
+      - video
+      - render
+    restart: unless-stopped
+
+volumes:
+  model-cache:
+    driver: local
