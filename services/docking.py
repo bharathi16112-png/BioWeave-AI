@@ -211,8 +211,10 @@ def _minimal_pdb_to_pdbqt(pdb_path: str, output_path: Path) -> None:
                 atom_name = line[12:16].strip()
                 element = "".join(c for c in atom_name if c.isalpha())[:2].upper()
             ad4_type = _ELEMENT_TO_AD4.get(element, "C")
-            # PDBQT format: PDB columns + charge (0.00) + AD4 type
-            pdbqt_line = f"{line[:66]}  0.00  {ad4_type:<2}"
+            # PDBQT format: exactly 66 chars of PDB + "  0.00" (charge) + " " + 2-char type
+            # Total line: cols 1-66 PDB | cols 67-72 charge "  0.00" | col 73 " " | cols 74-75 type
+            base = line[:66].rstrip().ljust(66)
+            pdbqt_line = f"{base}  0.000 {ad4_type:<2}"
             lines_out.append(pdbqt_line)
     output_path.write_text("\n".join(lines_out))
 
@@ -223,6 +225,7 @@ def _smiles_to_ligand_pdbqt(smiles: str, drug_name: str) -> str | None:
     """
     Convert a SMILES string to a PDBQT-format string using meeko.
     Returns the PDBQT content as a string, or None if meeko is unavailable.
+    Supports both meeko v0.4 (write_pdbqt_string) and v0.5+ (PDBQTWriterLegacy).
     """
     try:
         from meeko import MoleculePreparation
@@ -237,14 +240,30 @@ def _smiles_to_ligand_pdbqt(smiles: str, drug_name: str) -> str | None:
         mol = Chem.AddHs(mol)
         result = AllChem.EmbedMolecule(mol, AllChem.ETKDGv3())
         if result != 0:
-            # Fallback: use distance geometry
             AllChem.EmbedMolecule(mol, AllChem.ETKDG())
         AllChem.MMFFOptimizeMolecule(mol)
 
         preparator = MoleculePreparation()
-        preparator.prepare(mol)
-        pdbqt_string = preparator.write_pdbqt_string()
-        return pdbqt_string
+        mol_setups = preparator.prepare(mol)
+
+        # meeko v0.5+: prepare() returns a list of MoleculeSetup instances
+        if mol_setups and isinstance(mol_setups, list):
+            try:
+                from meeko import PDBQTWriterLegacy
+                pdbqt_string, is_ok, error_msg = PDBQTWriterLegacy.write_string(mol_setups[0])
+                if not is_ok:
+                    logger.warning("meeko PDBQTWriterLegacy error for %s: %s", drug_name, error_msg)
+                    return None
+                return pdbqt_string
+            except ImportError:
+                pass
+
+        # meeko v0.4 fallback: write_pdbqt_string() on the preparator
+        if hasattr(preparator, "write_pdbqt_string"):
+            return preparator.write_pdbqt_string()
+
+        logger.warning("Could not find a compatible meeko PDBQT writer for %s", drug_name)
+        return None
 
     except ImportError as exc:
         logger.warning("meeko/rdkit not available for ligand prep: %s", exc)
