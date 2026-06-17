@@ -3,10 +3,10 @@
 
 /* Apply styles to custom elements */
 .glass-card {
-    background: rgba(22, 27, 34, 0.6) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: rgba(17, 21, 28, 0.7) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: 12px !important;
     padding: 24px !important;
     margin-bottom: 16px !important;
@@ -14,8 +14,8 @@
 }
 
 .glass-card:hover {
-    border-color: rgba(0, 210, 211, 0.3) !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 210, 211, 0.08) !important;
+    border-color: rgba(0, 240, 255, 0.35) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 240, 255, 0.10) !important;
     transform: translateY(-2px) !important;
 }
 
@@ -59,19 +59,19 @@
     height: 12px;
     border-radius: 50%;
     background-color: #0E1117;
-    border: 2px solid #00D2D3;
+    border: 2px solid #00F0FF;
 }
 
 .trace-step.active::before {
-    background-color: #00D2D3;
-    box-shadow: 0 0 10px #00D2D3;
+    background-color: #00F0FF;
+    box-shadow: 0 0 10px #00F0FF;
     animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 210, 211, 0.7); }
-    70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(0, 210, 211, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 210, 211, 0); }
+    0%   { transform: scale(1);   box-shadow: 0 0 0 0   rgba(0, 240, 255, 0.7); }
+    70%  { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(0, 240, 255, 0);   }
+    100% { transform: scale(1);   box-shadow: 0 0 0 0   rgba(0, 240, 255, 0);   }
 }
 
 /* Metric styling */
@@ -85,6 +85,253 @@
 }
 
 .accent-text {
-    color: #00D2D3;
+    color: #00F0FF;
     font-family: 'Space Mono', monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PREMIUM TELEMETRY BLOCK
+   Base container that overrides st.markdown wrapper divs.
+   Usage:  st.markdown('<div class="telemetry-block">…</div>', unsafe_allow_html=True)
+═══════════════════════════════════════════════════════════════════ */
+.telemetry-block {
+    background-color: rgba(17, 21, 28, 0.7) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    padding: 22px 26px !important;
+    margin-bottom: 14px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transition:
+        border-color 0.25s ease,
+        box-shadow   0.25s ease,
+        transform    0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* Subtle top-edge highlight — adds depth without a visible gradient */
+.telemetry-block::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+        160deg,
+        rgba(255, 255, 255, 0.035) 0%,
+        transparent 55%
+    );
+    pointer-events: none;
+}
+
+.telemetry-block:hover {
+    border-color: rgba(0, 240, 255, 0.28) !important;
+    box-shadow:
+        0 0  0   1px rgba(0, 240, 255, 0.08),
+        0 8px 28px   rgba(0, 0, 0, 0.45) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   METRIC CARD  (sized for compact KPI blocks)
+═══════════════════════════════════════════════════════════════════ */
+.metric-card {
+    background-color: rgba(17, 21, 28, 0.7) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    padding: 18px 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transition:
+        border-color 0.2s ease,
+        box-shadow   0.2s ease,
+        transform    0.2s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ── Colour-coded accent variants ── */
+
+/* Mutation / danger — red left stripe + glow on hover */
+.metric-card--mutation {
+    border-left: 3px solid #FF4B4B !important;
+}
+.metric-card--mutation:hover {
+    border-color: #FF4B4B !important;
+    box-shadow:
+        0 0  0   1px rgba(255, 75, 75, 0.15),
+        0 12px 36px rgba(255, 75, 75, 0.12) !important;
+}
+
+/* Therapeutic / cyan — matches #00F0FF palette */
+.metric-card--therapeutic {
+    border-left: 3px solid #00F0FF !important;
+}
+.metric-card--therapeutic:hover {
+    border-color: #00F0FF !important;
+    box-shadow:
+        0 0  0   1px rgba(0, 240, 255, 0.15),
+        0 12px 36px rgba(0, 240, 255, 0.12) !important;
+}
+
+/* Pathway / amber */
+.metric-card--pathway {
+    border-left: 3px solid #FFAA00 !important;
+}
+.metric-card--pathway:hover {
+    border-color: #FFAA00 !important;
+    box-shadow:
+        0 0  0   1px rgba(255, 170, 0, 0.15),
+        0 12px 36px rgba(255, 170, 0, 0.12) !important;
+}
+
+/* Warning / moderate activity */
+.metric-card--warning {
+    border-left: 3px solid #FFAA00 !important;
+    background-color: rgba(255, 170, 0, 0.04) !important;
+}
+
+/* Suppressed / positive outcome */
+.metric-card--suppressed {
+    border-left: 3px solid #A8FFB2 !important;
+    background-color: rgba(168, 255, 178, 0.03) !important;
+}
+
+/* ── Typography helpers ── */
+.metric-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6E7681;
+    margin: 0;
+}
+
+.metric-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1.1;
+    margin: 0;
+}
+
+.metric-unit {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #A0A0A0;
+    margin-left: 4px;
+    vertical-align: baseline;
+}
+
+.metric-badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.metric-badge--red  { background: rgba(255, 75,  75,  0.15); color: #FF4B4B; border: 1px solid rgba(255, 75,  75,  0.3); }
+.metric-badge--cyan { background: rgba(0,  240, 255, 0.12); color: #00F0FF; border: 1px solid rgba(0,  240, 255, 0.3); }
+.metric-badge--amber{ background: rgba(255, 170, 0,  0.12); color: #FFAA00; border: 1px solid rgba(255, 170, 0,  0.3); }
+.metric-badge--green{ background: rgba(168, 255, 178, 0.1); color: #A8FFB2; border: 1px solid rgba(168, 255, 178, 0.3); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   STREAMLIT CONTAINER OVERRIDES
+   These selectors target the div layers Streamlit wraps around
+   st.markdown / st.container blocks so our classes "bleed through"
+   without requiring unsafe_allow_html wrappers on every call.
+═══════════════════════════════════════════════════════════════════ */
+
+/* st.container / st.expander inner wrapper */
+[data-testid="stVerticalBlock"] > [data-testid="stVerticalBlockBorderWrapper"],
+[data-testid="stExpander"] > div:first-child {
+    background-color: rgba(17, 21, 28, 0.7) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+}
+
+/* Ensure markdown DIVs that carry our own classes aren't double-padded */
+[data-testid="stMarkdownContainer"] > div.telemetry-block,
+[data-testid="stMarkdownContainer"] > div.metric-card {
+    /* Let the class own all spacing */
+    margin: 0 !important;
+}
+
+/* st.metric native widget — lift it to match the card look */
+[data-testid="stMetric"] {
+    background-color: rgba(17, 21, 28, 0.7) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    padding: 16px 20px !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+[data-testid="stMetric"]:hover {
+    border-color: rgba(0, 240, 255, 0.28) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-testid="stMetricLabel"] {
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: #6E7681 !important;
+}
+
+[data-testid="stMetricValue"] {
+    font-family: 'Space Mono', monospace !important;
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+}
+
+[data-testid="stMetricDelta"] {
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 0.82rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   GLOW PULSE  (reusable utility applied via class="glow-pulse")
+═══════════════════════════════════════════════════════════════════ */
+@keyframes glow-pulse {
+    0%, 100% {
+        box-shadow: 0 0 6px  2px rgba(0, 240, 255, 0.25);
+    }
+    50% {
+        box-shadow: 0 0 18px 6px rgba(0, 240, 255, 0.55);
+    }
+}
+
+.glow-pulse {
+    animation: glow-pulse 2.4s ease-in-out infinite;
+}
+
+.glow-pulse--red {
+    animation: glow-pulse-red 2.4s ease-in-out infinite;
+}
+
+@keyframes glow-pulse-red {
+    0%, 100% { box-shadow: 0 0 6px  2px rgba(255, 75, 75, 0.3); }
+    50%       { box-shadow: 0 0 18px 6px rgba(255, 75, 75, 0.6); }
 }
