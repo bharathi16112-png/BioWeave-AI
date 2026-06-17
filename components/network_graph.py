@@ -267,4 +267,4 @@ def render_network_graph(profile_data):
     if hasattr(st, 'iframe'):
         st.iframe(html, height=580)
     else:
-        components.html(html, height=580, scrolling=False)
+        components.html(html, height=580)
