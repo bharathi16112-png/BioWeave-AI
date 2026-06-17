@@ -227,15 +227,10 @@ def _minimal_pdb_to_pdbqt(pdb_path: str, output_path: Path) -> None:
                 base = base.ljust(66)
 
             # PDBQT fixed columns (1-indexed):
-            # 1-66:  standard PDB
-            # 67-70: space + charge sign+digits  " 0.000" but we need col67=space
-            # We append a space so charge digits land on cols 68-73, then type on 74-77
-            # Vina parses by splitting whitespace on the last two tokens, not strict cols
-            # so: base + "  0.000" + " " + type works reliably
-            charge_str = "  0.000"   # 7 chars: two spaces + "0.000"
-            type_str   = f" {ad4_type:<2}"  # 3 chars: space + 2-char type
-
-            pdbqt_line = base + charge_str + type_str
+            # PDBQT fixed columns (Vina 1.2.x, from parse_pdbqt.cpp):
+            # charge at index 70-75 (substr(70,6)), type at index 77-78 (substr(77,2))
+            # base(66) + 4 spaces + charge(6) + space + type(2) = 79 chars total
+            pdbqt_line = base.ljust(66) + "    " + " 0.000" + " " + f"{ad4_type:<2}"
             lines_out.append(pdbqt_line)
 
     output_path.write_text("\n".join(lines_out))
@@ -262,6 +257,9 @@ def _get_receptor_centroid(receptor_path: Path) -> list[float]:
         round((min(ys) + max(ys)) / 2, 2),
         round((min(zs) + max(zs)) / 2, 2),
     ]
+
+
+def _smiles_to_ligand_pdbqt(smiles: str, drug_name: str) -> str | None:
     """
     Convert a SMILES string to a PDBQT-format string using meeko.
     Returns the PDBQT content as a string, or None if meeko is unavailable.
