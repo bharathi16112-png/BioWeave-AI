@@ -226,10 +226,14 @@ def _minimal_pdb_to_pdbqt(pdb_path: str, output_path: Path) -> None:
             if len(base) < 66:
                 base = base.ljust(66)
 
-            # charge: 6 chars right-justified  " 0.000"
-            # type:   4 chars right-justified  "  NA" or "   C"
-            charge_str = f"{0.0:6.3f}"          # ' 0.000'  (6 chars)
-            type_str   = f"{ad4_type:>4}"        # '  NA'    (4 chars)
+            # PDBQT fixed columns (1-indexed):
+            # 1-66:  standard PDB
+            # 67-70: space + charge sign+digits  " 0.000" but we need col67=space
+            # We append a space so charge digits land on cols 68-73, then type on 74-77
+            # Vina parses by splitting whitespace on the last two tokens, not strict cols
+            # so: base + "  0.000" + " " + type works reliably
+            charge_str = "  0.000"   # 7 chars: two spaces + "0.000"
+            type_str   = f" {ad4_type:<2}"  # 3 chars: space + 2-char type
 
             pdbqt_line = base + charge_str + type_str
             lines_out.append(pdbqt_line)
@@ -239,7 +243,25 @@ def _minimal_pdb_to_pdbqt(pdb_path: str, output_path: Path) -> None:
 
 # ── Ligand PDBQT preparation ─────────────────────────────────────────────────
 
-def _smiles_to_ligand_pdbqt(smiles: str, drug_name: str) -> str | None:
+def _get_receptor_centroid(receptor_path: Path) -> list[float]:
+    """Compute the centroid of all ATOM coordinates in a PDBQT file."""
+    xs, ys, zs = [], [], []
+    with open(receptor_path) as f:
+        for line in f:
+            if line.startswith("ATOM") or line.startswith("HETATM"):
+                try:
+                    xs.append(float(line[30:38]))
+                    ys.append(float(line[38:46]))
+                    zs.append(float(line[46:54]))
+                except ValueError:
+                    pass
+    if not xs:
+        return [0.0, 0.0, 0.0]
+    return [
+        round((min(xs) + max(xs)) / 2, 2),
+        round((min(ys) + max(ys)) / 2, 2),
+        round((min(zs) + max(zs)) / 2, 2),
+    ]
     """
     Convert a SMILES string to a PDBQT-format string using meeko.
     Returns the PDBQT content as a string, or None if meeko is unavailable.
@@ -346,9 +368,15 @@ def run_docking(mutation_key: str, force: bool = False) -> DockingResult:
         v = Vina(sf_name="vina", cpu=0, seed=42, verbosity=0)
         v.set_receptor(str(receptor_path))
         v.set_ligand_from_string(ligand_pdbqt)
+
+        # Use actual receptor centroid — hardcoded coords from docking_targets.py
+        # may not match the coordinate frame of the downloaded PDB
+        center = _get_receptor_centroid(receptor_path)
+        logger.info("Docking %s: centroid=%s", mutation_key, center)
+
         v.compute_vina_maps(
-            center=target["center"],
-            box_size=target["box_size"],
+            center=center,
+            box_size=[40, 40, 40],
         )
         v.dock(
             exhaustiveness=target.get("exhaustiveness", 12),
