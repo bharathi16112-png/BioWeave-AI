@@ -7,6 +7,7 @@ from components.network_graph import render_network_graph
 from components.intervention_engine import render_intervention_engine
 from components.why_not_panel import render_why_not_panel
 from components.evidence_timeline import render_evidence_timeline
+from pipeline import run_multi_agent_pipeline
 
 # Set up page configurations
 st.set_page_config(
@@ -41,7 +42,22 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-st.sidebar.subheader("Select Genomic Mutation Profile")
+st.sidebar.subheader("Live Inference (AMD MI300X)")
+raw_report = st.sidebar.text_area(
+    "Paste Raw Clinical Report", 
+    height=150, 
+    placeholder="Patient exhibits BRAF V600E mutation with elevated MEK signaling..."
+)
+if st.sidebar.button("⚡ Run Multi-Agent Pipeline", type="primary", use_container_width=True):
+    if raw_report.strip():
+        inferred_profile = run_multi_agent_pipeline(raw_report)
+        if inferred_profile:
+            st.session_state["live_profile"] = inferred_profile
+    else:
+        st.sidebar.warning("Please paste a report first.")
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("Or Select Mock Profile")
 available_mutations = get_available_mutations()
 
 selected_mutation = st.sidebar.selectbox(
@@ -52,11 +68,18 @@ selected_mutation = st.sidebar.selectbox(
 )
 
 # Load selected mutation data
-try:
-    profile_data = load_profile(selected_mutation)
-except Exception as e:
-    st.error(f"Failed to load mutation profile: {e}")
-    st.stop()
+if "live_profile" in st.session_state:
+    profile_data = st.session_state["live_profile"]
+    st.sidebar.success("Displaying live inference results")
+    if st.sidebar.button("Clear Live Profile", use_container_width=True):
+        del st.session_state["live_profile"]
+        st.rerun()
+else:
+    try:
+        profile_data = load_profile(selected_mutation)
+    except Exception as e:
+        st.error(f"Failed to load mutation profile: {e}")
+        st.stop()
 
 # Header Section
 st.markdown(
